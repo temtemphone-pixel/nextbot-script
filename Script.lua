@@ -1,31 +1,34 @@
+-- [[ 100% WORKING ANTI-BLACKOUT MENU WITH DESCRIPTION FOR XENO ]] --
 local Players = game:Service("Players")
 local RunService = game:Service("RunService")
 local UserInputService = game:Service("UserInputService")
-local CoreGui = game:Service("CoreGui")
+local Lighting = game:Service("Lighting")
 local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- --- CONFIGURATION & STATES ---
-local targetSpeed = 16 
-local speedEnabled = false
-local noclipEnabled = false
-local infJumpEnabled = false
+-- Remove old GUI if exists
+if PlayerGui:FindFirstChild("XenoMenuGlobal") then PlayerGui.XenoMenuGlobal:Destroy() end
 
--- --- FEATURE LOGIC ---
--- Speed Loop
+-- STATES
+local speed = 100
+local tSpeed = false
+local tNoclip = false
+local tJump = false
+local tBright = false
+
+-- FEATURE LOOPS
 task.spawn(function()
     while task.wait(0.1) do
         pcall(function()
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-                local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                humanoid.WalkSpeed = speedEnabled and targetSpeed or 16
+            if tSpeed and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = speed
             end
         end)
     end
 end)
 
--- Infinite Jump
 UserInputService.JumpRequest:Connect(function()
-    if infJumpEnabled then
+    if tJump then
         pcall(function()
             if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
                 LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
@@ -34,149 +37,137 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
--- Noclip
 RunService.Stepped:Connect(function()
-    if noclipEnabled and LocalPlayer.Character then
+    if tNoclip and LocalPlayer.Character then
         for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-            if part:IsA("BasePart") and part.CanCollide then
-                part.CanCollide = false
-            end
+            if part:IsA("BasePart") then part.CanCollide = false end
         end
     end
 end)
 
--- --- GUI CREATION ---
-local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local UIListLayout = Instance.new("UIListLayout")
-local Title = Instance.new("TextLabel")
-local SpeedToggleBtn = Instance.new("TextButton")
-local SpeedInputBox = Instance.new("TextBox") -- ช่องใส่ความเร็ว
-local NoclipBtn = Instance.new("TextButton")
-local InfJumpBtn = Instance.new("TextButton")
-local ToggleGuiBtn = Instance.new("TextButton")
-
--- ScreenGui Setup
-ScreenGui.Name = "XenoCustomSpeedGui"
-ScreenGui.Parent = CoreGui
-ScreenGui.ResetOnSpawn = false
-
--- Main Frame 
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-MainFrame.BorderSizePixel = 0
-MainFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
-MainFrame.Size = UDim2.new(0, 180, 0, 270)
-MainFrame.Active = true
-MainFrame.Draggable = true
-
--- Layout
-UIListLayout.Parent = MainFrame
-UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout.Padding = UDim.new(0, 8)
-
--- Title
-Title.Name = "Title"
-Title.Parent = MainFrame
-Title.Size = UDim2.new(1, 0, 0, 35)
-Title.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-Title.Text = "Xeno Menu"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 16
-Title.Font = Enum.Font.SourceSansBold
-
--- Helper function to style elements
-local function styleElement(element, text, isBox)
-    element.Size = UDim2.new(0.9, 0, 0, 40)
-    element.BackgroundColor3 = isBox and Color3.fromRGB(20, 20, 25) or Color3.fromRGB(50, 50, 55)
-    element.Text = text
-    element.TextColor3 = Color3.fromRGB(255, 255, 255)
-    element.TextSize = 14
-    element.Font = Enum.Font.SourceSans
-    element.BorderSizePixel = 0
-end
-
-styleElement(SpeedToggleBtn, "Speed: OFF", false)
-styleElement(SpeedInputBox, "100", true) 
-styleElement(NoclipBtn, "Noclip: OFF", false)
-styleElement(InfJumpBtn, "Infinite Jump: OFF", false)
-
--- ตั้งค่าเฉพาะของ TextBox (ช่องใส่ความเร็ว)
-SpeedInputBox.PlaceholderText = "text speed"
-SpeedInputBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
-targetSpeed = 100 --
-
--- Parent Elements
-SpeedToggleBtn.Parent = MainFrame
-SpeedInputBox.Parent = MainFrame
-NoclipBtn.Parent = MainFrame
-InfJumpBtn.Parent = MainFrame
-
--- Toggle Mini Button 
-ToggleGuiBtn.Name = "ToggleGuiBtn"
-ToggleGuiBtn.Parent = ScreenGui
-ToggleGuiBtn.Position = UDim2.new(0.05, 0, 0.15, 0)
-ToggleGuiBtn.Size = UDim2.new(0, 60, 0, 25)
-ToggleGuiBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-ToggleGuiBtn.Text = "Hide/Show"
-ToggleGuiBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleGuiBtn.TextSize = 12
-ToggleGuiBtn.BorderSizePixel = 0
-
--- --- INTERACTION LOGIC ---
-
-local function toggleSpeed()
-    speedEnabled = not speedEnabled
-    SpeedToggleBtn.Text = "Speed: " .. (speedEnabled and "ON" or "OFF")
-    SpeedToggleBtn.BackgroundColor3 = speedEnabled and Color3.fromRGB(0, 170, 100) or Color3.fromRGB(50, 50, 55)
-end
-
-local function toggleNoclip()
-    noclipEnabled = not noclipEnabled
-    NoclipBtn.Text = "Noclip: " .. (noclipEnabled and "ON" or "OFF")
-    NoclipBtn.BackgroundColor3 = noclipEnabled and Color3.fromRGB(0, 170, 100) or Color3.fromRGB(50, 50, 55)
-end
-
-local function toggleInfJump()
-    infJumpEnabled = not infJumpEnabled
-    InfJumpBtn.Text = "Inf Jump: " .. (infJumpEnabled and "ON" or "OFF")
-    InfJumpBtn.BackgroundColor3 = infJumpEnabled and Color3.fromRGB(0, 170, 100) or Color3.fromRGB(50, 50, 55)
-end
-
--- ดักจับเมื่อผู้เล่นพิมพ์ความเร็วแล้วกด Enter หรือเปลี่ยนไปจิ้มที่อื่น
-SpeedInputBox.FocusLost:Connect(function(enterPressed)
-    local text = SpeedInputBox.Text
-    local number = tonumber(text)
-    
-    if number then
-        targetSpeed = number
-    else
-        -- ถ้าพิมพ์ไม่ใช่ตัวเลข ให้ตีกลับไปค่าเดิม
-        SpeedInputBox.Text = tostring(targetSpeed)
+-- ULTRA BRIGHTNESS LOOP (Bypasses Map Blackouts)
+task.spawn(function()
+    while task.wait(0.1) do
+        if tBright then
+            pcall(function()
+                Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+                Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+                Lighting.Brightness = 10 
+                Lighting.ClockTime = 14  
+                Lighting.FogEnd = 999999 
+                Lighting.GlobalShadows = false 
+                
+                for _, effect in pairs(Lighting:GetChildren()) do
+                    if effect:IsA("Atmosphere") or effect:IsA("Sky") then
+                        if effect:IsA("Atmosphere") then effect.Density = 0 end
+                    end
+                end
+            end)
+        end
     end
 end)
 
--- Click Events
-SpeedToggleBtn.MouseButton1Click:Connect(toggleSpeed)
-NoclipBtn.MouseButton1Click:Connect(toggleNoclip)
-InfJumpBtn.MouseButton1Click:Connect(toggleInfJump)
-ToggleGuiBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
+-- GUI GENERATION
+local sg = Instance.new("ScreenGui", PlayerGui)
+sg.Name = "XenoMenuGlobal"
+sg.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", sg)
+frame.Size = UDim2.new(0, 180, 0, 310) -- เพิ่มความสูงรองรับข้อความอธิบาย
+frame.Position = UDim2.new(0.1, 0, 0.2, 0)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+frame.Active = true
+frame.Draggable = true
+
+local layout = Instance.new("UIListLayout", frame)
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+layout.Padding = UDim.new(0, 5)
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 35)
+title.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+title.Text = "Xeno Hub"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 15
+
+local bSpeed = Instance.new("TextButton", frame)
+bSpeed.Size = UDim2.new(0.9, 0, 0, 35)
+bSpeed.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+bSpeed.Text = "Speed: OFF"
+bSpeed.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local iSpeed = Instance.new("TextBox", frame)
+iSpeed.Size = UDim2.new(0.9, 0, 0, 30)
+iSpeed.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+iSpeed.Text = "100"
+iSpeed.TextColor3 = Color3.fromRGB(255, 255, 255)
+iSpeed.PlaceholderText = "Enter Speed..."
+
+local bNoclip = Instance.new("TextButton", frame)
+bNoclip.Size = UDim2.new(0.9, 0, 0, 35)
+bNoclip.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+bNoclip.Text = "Noclip: OFF"
+bNoclip.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local bJump = Instance.new("TextButton", frame)
+bJump.Size = UDim2.new(0.9, 0, 0, 35)
+bJump.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+bJump.Text = "Inf Jump: OFF"
+bJump.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local bBright = Instance.new("TextButton", frame)
+bBright.Size = UDim2.new(0.9, 0, 0, 35)
+bBright.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+bBright.Text = "Anti-Blackout: OFF"
+bBright.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+-- TEXT DESCRIPTION FOR BUTTON 5 (คำอธิบายใต้ปุ่มเมนูที่ 5)
+local descBright = Instance.new("TextLabel", frame)
+descBright.Size = UDim2.new(0.9, 0, 0, 30)
+descBright.BackgroundTransparency = 1
+descBright.Text = "(Use this fix when map power outages or pitch black)"
+descBright.TextColor3 = Color3.fromRGB(180, 180, 180)
+descBright.TextSize = 11
+descBright.Font = Enum.Font.SourceSansItalic
+descBright.TextWrapped = true
+
+-- BUTTON TOGGLES
+bSpeed.MouseButton1Click:Connect(function()
+    tSpeed = not tSpeed
+    bSpeed.Text = "Speed: " .. (tSpeed and "ON" or "OFF")
+    bSpeed.BackgroundColor3 = tSpeed and Color3.fromRGB(0, 170, 100) or Color3.fromRGB(50, 50, 55)
 end)
 
--- PC Keybinds
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end -- ป้องกันปุ่มลัดทำงานตอนกำลังพิมพ์ในช่องใส่ความเร็ว
-    
-    if input.KeyCode == Enum.KeyCode.Z then
-        toggleSpeed()
-    elseif input.KeyCode == Enum.KeyCode.X then
-        toggleNoclip()
-    elseif input.KeyCode == Enum.KeyCode.C then
-        toggleInfJump()
-    elseif input.KeyCode == Enum.KeyCode.V then
-        MainFrame.Visible = not MainFrame.Visible
-    end
+iSpeed.FocusLost:Connect(function()
+    local n = tonumber(iSpeed.Text)
+    if n then speed = n else iSpeed.Text = tostring(speed) end
+end)
+
+bNoclip.MouseButton1Click:Connect(function()
+    tNoclip = not tNoclip
+    bNoclip.Text = "Noclip: " .. (tNoclip and "ON" or "OFF")
+    bNoclip.BackgroundColor3 = tNoclip and Color3.fromRGB(0, 170, 100) or Color3.fromRGB(50, 50, 55)
+end)
+
+bJump.MouseButton1Click:Connect(function()
+    tJump = not tJump
+    bJump.Text = "Inf Jump: " .. (tJump and "ON" or "OFF")
+    bJump.BackgroundColor3 = tJump and Color3.fromRGB(0, 170, 100) or Color3.fromRGB(50, 50, 55)
+end)
+
+bBright.MouseButton1Click:Connect(function()
+    tBright = not tBright
+    bBright.Text = "Anti-Blackout: " .. (tBright and "ON" or "OFF")
+    bBright.BackgroundColor3 = tBright and Color3.fromRGB(0, 170, 100) or Color3.fromRGB(50, 50, 55)
+end)
+
+-- PC KEYBINDS (Z, X, C, F, V)
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.Z then tSpeed = not tSpeed bSpeed.Text = "Speed: "..(tSpeed and "ON" or "OFF") bSpeed.BackgroundColor3 = tSpeed and Color3.fromRGB(0,170,100) or Color3.fromRGB(50,50,55)
+    elseif input.KeyCode == Enum.KeyCode.X then tNoclip = not tNoclip bNoclip.Text = "Noclip: "..(tNoclip and "ON" or "OFF") bNoclip.BackgroundColor3 = tNoclip and Color3.fromRGB(0,170,100) or Color3.fromRGB(50,50,55)
+    elseif input.KeyCode == Enum.KeyCode.C then tJump = not tJump bJump.Text = "Inf Jump: "..(tJump and "ON" or "OFF") bJump.BackgroundColor3 = tJump and Color3.fromRGB(0,170,100) or Color3.fromRGB(50,50,55)
+    elseif input.KeyCode == Enum.KeyCode.F then tBright = not tBright bBright.Text = "Anti-Blackout: "..(tBright and "ON" or "OFF") bBright.BackgroundColor3 = tBright and Color3.fromRGB(0,170,100) or Color3.fromRGB(50,50,55)
+    elseif input.KeyCode == Enum.KeyCode.V then frame.Visible = not frame.Visible end
 end)
