@@ -1,4 +1,4 @@
--- [[ troll nextbot v1.0 - AUTO JUMP HOLD EDITION ]] --
+-- [[ troll nextbot v1.0 - KAVO UI MOBILE + PC SLIDER EDITION ]] --
 
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("troll nextbot v1.0 😈", "DarkTheme")
@@ -9,7 +9,7 @@ local Section1 = Tab1:NewSection("Nextbot Troll Tools")
 
 -- ระบบหลังบ้าน: ลูปเช็คและล็อกสปีดตลอดเวลา (สู้กับระบบเกม)
 local player = game:GetService("Players").LocalPlayer
-local currentSpeed = 16 
+local currentSpeed = 16 -- ค่าเริ่มต้น
 
 local function loopSpeed(character)
     local humanoid = character:WaitForChild("Humanoid", 10)
@@ -26,9 +26,10 @@ end
 if player.Character then loopSpeed(player.Character) end
 player.CharacterAdded:Connect(loopSpeed)
 
--- 1. SPEED SLIDER FUNCTION (เวอร์ชัน Mobile + PC)
+-- 1. SPEED SLIDER FUNCTION (เปลี่ยนจากช่องพิมพ์เป็นแถบเลื่อน เพื่อให้ใช้งานง่ายบนมือถือ)
+-- ปรับค่าต่ำสุดที่ 16 (ปกติ) และสูงสุดที่ 200 (ปรับเพิ่ม/ลดเองตามใจชอบได้ตรงตัวเลขด้านล่าง)
 Section1:NewSlider("Set WalkSpeed", "Slide to change speed directly", 200, 16, function(s)
-    currentSpeed = s
+    currentSpeed = s -- พอเอานิ้วลากสไลด์ปุ๊บ ค่า currentSpeed จะเปลี่ยนตามทันทีโดยไม่ต้องกด Enter!
     pcall(function()
         if player.Character and player.Character:FindFirstChild("Humanoid") then
             player.Character.Humanoid.WalkSpeed = currentSpeed
@@ -36,7 +37,7 @@ Section1:NewSlider("Set WalkSpeed", "Slide to change speed directly", 200, 16, f
     end)
 end)
 
--- ปุ่มรีเซ็ตความเร็ว
+-- ปุ่มรีเซ็ตความเร็วกลับเป็นค่าปกติ
 Section1:NewButton("Reset Speed (Normal)", "Reset back to 16", function()
     currentSpeed = 16
     pcall(function()
@@ -62,16 +63,17 @@ Section1:NewToggle("Noclip (Walk Through Walls)", "Toggle noclip on/off", functi
     noclip = state
 end)
 
--- 3. INFINITE JUMP FUNCTION (แก้ไขใหม่: กดค้างรอบเดียวโดดรัวๆ ออโต้)
+-- 3. INFINITE JUMP FUNCTION (แก้ไขใหม่: กดค้างรอบเดียวโดดรัวๆ ออโต้ รองรับ PC + Mobile)
 local InfiniteJumpEnabled = false
 game:GetService("RunService").RenderStepped:Connect(function()
     if InfiniteJumpEnabled then
         pcall(function()
             local character = player.Character
             local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+            local uis = game:GetService("UserInputService")
             
-            -- เช็คว่าถ้าผู้เล่นกดปุ่มกระโดดค้างไว้ (ทั้งบนมือถือและคอม) และตัวละครไม่ได้ลอยสูงเกินไป
-            if humanoid and game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) or (humanoid and humanoid.Jump) then
+            -- ตรวจสอบการกดค้าง: รองรับทั้ง Spacebar (PC) และการกดปุ่มโดดค้างบนจอ (Mobile)
+            if humanoid and (uis:IsKeyDown(Enum.KeyCode.Space) or humanoid.Jump) then
                 humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
             end
         end)
@@ -82,7 +84,7 @@ Section1:NewToggle("Infinite Jump (Hold to Bunnyhop)", "Toggle auto jump on/off"
     InfiniteJumpEnabled = state
 end)
 
--- 4. FULL BRIGHT FUNCTION
+-- 4. FULL BRIGHT FUNCTION (คำอธิบายภาษาอังกฤษตรงปุ่มชัด ๆ)
 local Light = game:GetService("Lighting")
 local fullbright = false
 
@@ -97,5 +99,4 @@ Section1:NewToggle("Full Bright (Use when lights go out)", "Anti-Dark Mode", fun
         Light.Brightness = 1
         Light.GlobalShadows = true
     end
-end)
 end)
