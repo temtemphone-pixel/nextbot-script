@@ -27,9 +27,8 @@ if player.Character then loopSpeed(player.Character) end
 player.CharacterAdded:Connect(loopSpeed)
 
 -- 1. SPEED SLIDER FUNCTION (เปลี่ยนจากช่องพิมพ์เป็นแถบเลื่อน เพื่อให้ใช้งานง่ายบนมือถือ)
--- ปรับค่าต่ำสุดที่ 16 (ปกติ) และสูงสุดที่ 200 (ปรับเพิ่ม/ลดเองตามใจชอบได้ตรงตัวเลขด้านล่าง)
 Section1:NewSlider("Set WalkSpeed", "Slide to change speed directly", 200, 16, function(s)
-    currentSpeed = s -- พอเอานิ้วลากสไลด์ปุ๊บ ค่า currentSpeed จะเปลี่ยนตามทันทีโดยไม่ต้องกด Enter!
+    currentSpeed = s 
     pcall(function()
         if player.Character and player.Character:FindFirstChild("Humanoid") then
             player.Character.Humanoid.WalkSpeed = currentSpeed
@@ -63,20 +62,28 @@ Section1:NewToggle("Noclip (Walk Through Walls)", "Toggle noclip on/off", functi
     noclip = state
 end)
 
--- 3. INFINITE JUMP FUNCTION (แก้ไขใหม่: กดค้างรอบเดียวโดดรัวๆ ออโต้ รองรับ PC + Mobile)
+-- 3. INFINITE JUMP FUNCTION (เวอร์ชันแก้บั๊ก F9 สีแดง - กดค้างรอบเดียวโดดรัวๆ)
 local InfiniteJumpEnabled = false
-game:GetService("RunService").RenderStepped:Connect(function()
-    if InfiniteJumpEnabled then
-        pcall(function()
-            local character = player.Character
-            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-            local uis = game:GetService("UserInputService")
-            
-            -- ตรวจสอบการกดค้าง: รองรับทั้ง Spacebar (PC) และการกดปุ่มโดดค้างบนจอ (Mobile)
-            if humanoid and (uis:IsKeyDown(Enum.KeyCode.Space) or humanoid.Jump) then
-                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-            end
-        end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.05) -- ลูปเช็คทุกๆ 0.05 วินาที เพื่อไม่ให้หนักเครื่องและไม่เกิด Error
+        if InfiniteJumpEnabled then
+            pcall(function()
+                local character = player.Character
+                local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+                
+                if humanoid and humanoid.Health > 0 then
+                    local uis = game:GetService("UserInputService")
+                    
+                    -- เช็คว่ามีการกดค้าง (Spacebar บน PC หรือ ปุ่มกระโดดบนหน้าจอมือถือ)
+                    if uis:IsKeyDown(Enum.KeyCode.Space) or humanoid.Jump then
+                        -- บังคับสถานะให้กระโดดรัวๆ อัตโนมัติ
+                        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                    end
+                end
+            end)
+        end
     end
 end)
 
